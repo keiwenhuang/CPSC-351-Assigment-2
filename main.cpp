@@ -6,11 +6,38 @@
 
 #include <iostream>
 #include <sstream>
+#include <thread>
 
 using namespace std;
 
+void best_fit()
+{
+
+}
+
+void first_fit()
+{
+
+}
+
+void worst_fit()
+{
+
+}
+
 int main(int argc, char const *argv[])
 {
+    // some idea using threading
+    thread t1(best_fit);
+    t1.join();
+
+    thread t2(first_fit);
+    t2.join();
+
+    thread t3(worst_fit);
+    t3.join();
+
+
     int user_choice;
     int blocks;
     string initial_memory_blocks;
