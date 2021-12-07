@@ -53,22 +53,25 @@ Memory memory;
 // int process_memory[5] = {150, 250, 50, 450, 300};
 
 //global vectors
-vector<Memory> init_memory;
-vector<Memory> process_memory;
-int free_memory;
+vector<Memory> init_memory_blocks;
+vector<Memory> process_memory_blocks;
 
 // best fit - Calculate a total number of free memory blocks (aka “holes”) 
 void *best_fit(void* arg)
 {
     // best fit algorithm
     mtx.lock();
+    vector<Memory> free_memory_blocks;
+    free_memory_blocks = init_memory_blocks;
+    int free_memory;
+
     cout << "blocks in best: " << memory.get_block() << endl;
 
-    for (int i = 0; i < memory.get_block(); ++i)
-    {
-        cout << "init memory " << i << " " << init_memory[i].get_memory() << endl;
-        cout << "process memory " << i << " " << process_memory[i].get_memory() << endl;
-    }
+    // for (int i = 0; i < memory.get_block(); ++i)
+    // {
+    //     cout << "init memory " << i << " " << free_memory_blocks[i].get_memory() << endl;
+    //     cout << "process memory " << i << " " << process_memory_blocks[i].get_memory() << endl;
+    // }
 
     for (int i = 0; i < memory.get_block(); ++i)
     {
@@ -76,24 +79,24 @@ void *best_fit(void* arg)
         int best_index = -1;
         for (int j = 0; j < memory.get_block(); ++j)
         {
-            if (init_memory[j].get_memory() >= process_memory[i].get_memory())
+            if (free_memory_blocks[j].get_memory() >= process_memory_blocks[i].get_memory())
             {
                 if (best_index == -1)
                 {
                     best_index = j;
-                } else if (init_memory[best_index].get_memory() > init_memory[j].get_memory())
+                } else if (free_memory_blocks[best_index].get_memory() > free_memory_blocks[j].get_memory())
                 {
                     best_index = j;
                 }
             }
         } 
-        int newVal = init_memory[best_index].get_memory() - process_memory[i].get_memory();
-        init_memory[best_index].set_memory(newVal);
+        int newVal = free_memory_blocks[best_index].get_memory() - process_memory_blocks[i].get_memory();
+        free_memory_blocks[best_index].set_memory(newVal);
     }
 
     for (int i = 0; i < memory.get_block(); ++i)
     {
-        free_memory += init_memory[i].get_memory();
+        free_memory += free_memory_blocks[i].get_memory();
     }
     cout << "Free Memory From Best Fit Is: " << free_memory << endl;
     mtx.unlock();
@@ -104,22 +107,26 @@ void *best_fit(void* arg)
 void *first_fit(void *arg)
 {
     mtx.lock();
+    vector<Memory> free_memory_blocks;
+    free_memory_blocks = init_memory_blocks;
+    int free_memory;
+
     // algorithm
 
-    for (int i = 0; i < memory.get_block(); ++i)
-    {
-        cout << "init memory " << i << " " << init_memory[i].get_memory() << endl;
-        cout << "process memory " << i << " " << process_memory[i].get_memory() << endl;
-    }
+    // for (int i = 0; i < memory.get_block(); ++i)
+    // {
+    //     cout << "init memory " << i << " " << free_memory_blocks[i].get_memory() << endl;
+    //     cout << "process memory " << i << " " << process_memory_blocks[i].get_memory() << endl;
+    // }
 
     for (int i = 0; i < memory.get_block(); ++i)
     {
         for (int j = 0; j < memory.get_block(); ++j)
         {
-            if (init_memory[j].get_memory() >= process_memory[i].get_memory())
+            if (free_memory_blocks[j].get_memory() >= process_memory_blocks[i].get_memory())
             {
-                int newVal = init_memory[j].get_memory() - process_memory[i].get_memory();
-                init_memory[j].set_memory(newVal);
+                int newVal = free_memory_blocks[j].get_memory() - process_memory_blocks[i].get_memory();
+                free_memory_blocks[j].set_memory(newVal);
                 break;
             }
         }
@@ -127,7 +134,7 @@ void *first_fit(void *arg)
 
     for (int i = 0; i < memory.get_block(); ++i)
     {
-        free_memory += init_memory[i].get_memory();
+        free_memory += free_memory_blocks[i].get_memory();
     }
     cout << "Free Memory From First Fit Is: " << free_memory << endl;
 
@@ -139,37 +146,42 @@ void *first_fit(void *arg)
 void *worst_fit(void* arg)
 {
     mtx.lock();
+    vector<Memory> free_memory_blocks;
+    free_memory_blocks = init_memory_blocks;
+    int free_memory;
+
     // algorithm
 
-    for (int i = 0; i < memory.get_block(); ++i)
-    {
-        cout << "init memory " << i << " " << init_memory[i].get_memory() << endl;
-        cout << "process memory " << i << " " << process_memory[i].get_memory() << endl;
-    }
+    // for (int i = 0; i < memory.get_block(); ++i)
+    // {
+    //     cout << "init memory " << i << " " << free_memory_blocks[i].get_memory() << endl;
+    //     cout << "process memory " << i << " " << process_memory_blocks[i].get_memory() << endl;
+    // }
 
     for (int i = 0; i < memory.get_block(); ++i)
     {
         int worst_index = -1;
         for (int j = 0; j < memory.get_block(); ++j)
         {
-            if (init_memory[j].get_memory() >= process_memory[i].get_memory())
+            if (free_memory_blocks[j].get_memory() >= process_memory_blocks[i].get_memory())
             {
                 if (worst_index == -1)
                 {
                     worst_index = j;
-                } else if (init_memory[worst_index].get_memory() < init_memory[j].get_memory())
+                } else if (free_memory_blocks[worst_index].get_memory() < free_memory_blocks[j].get_memory())
                 {
                     worst_index = j;
                 }
             }
         }
-        int newVal = init_memory[worst_index].get_memory() - process_memory[i].get_memory();
-        init_memory[worst_index].set_memory(newVal);
+
+        int newVal = free_memory_blocks[worst_index].get_memory() - process_memory_blocks[i].get_memory();
+        free_memory_blocks[worst_index].set_memory(newVal);
     }
 
     for (int i = 0; i < memory.get_block(); ++i)
     {
-        free_memory += init_memory[i].get_memory();
+        free_memory += free_memory_blocks[i].get_memory();
     }
 
     cout << "Free Memory From Worst Fit Is: " << free_memory << endl;
@@ -195,10 +207,7 @@ int main(int argc, char const *argv[])
         cin >> input;
         memory.set_block(blocks);
         memory.set_memory(input);
-		init_memory.push_back(memory);
-        // cout << "memory: " << input << ", blocks: " << blocks << endl; 
-        // cout << "int memory: " << init_memory[i].get_memory() << endl;
-        // cout << "ini memory: " << memory.get_memory() << ", init block: " << memory.get_block() << endl;
+		init_memory_blocks.push_back(memory);
 	}
 
     // int process_blks[blocks];
@@ -208,16 +217,8 @@ int main(int argc, char const *argv[])
         cin >> input;
         memory.set_block(blocks);
         memory.set_memory(input);
-		process_memory.push_back(memory);
-        // cout << "pro memory: " << process_memory[i].get_memory() << endl;
-        // cout << "pro memory: " << memory.get_memory() << ", pro block: " << memory.get_block() << endl;
+		process_memory_blocks.push_back(memory);
 	}
-
-    // for (int i = 0; i < memory.get_block(); ++i)
-    // {
-    //     cout << "init memory " << i << " " << init_memory[i].get_memory() << endl;
-    //     cout << "process memory " << i << " " << process_memory[i].get_memory() << endl;
-    // }
 
     // some idea using threading
     pthread_t tid0, tid1, tid2;
@@ -229,6 +230,8 @@ int main(int argc, char const *argv[])
     pthread_join(tid0, NULL);
     pthread_join(tid1, NULL);
     pthread_join(tid2, NULL);
+
+    pthread_exit(NULL);
 
     return 0;
 }
