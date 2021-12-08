@@ -59,26 +59,19 @@ vector<Memory> process_memory_blocks;
 // best fit - Calculate a total number of free memory blocks (aka “holes”) 
 void *best_fit(void* arg)
 {
-    // best fit algorithm
     mtx.lock();
     vector<Memory> free_memory_blocks;
     free_memory_blocks = init_memory_blocks;
     int free_memory;
 
-    cout << "blocks in best: " << memory.get_block() << endl;
-
-    // for (int i = 0; i < memory.get_block(); ++i)
-    // {
-    //     cout << "init memory " << i << " " << free_memory_blocks[i].get_memory() << endl;
-    //     cout << "process memory " << i << " " << process_memory_blocks[i].get_memory() << endl;
-    // }
-
+    // best fit algorithm
     for (int i = 0; i < memory.get_block(); ++i)
     {
         // find best fit block for current process
         int best_index = -1;
         for (int j = 0; j < memory.get_block(); ++j)
         {
+            if (free_memory_blocks[j].get_memory() < process_memory_blocks[i].get_memory() && j == memory.get_block() - 1) cout << "Process "  << i + 1 << " cannot be allocated." << endl;
             if (free_memory_blocks[j].get_memory() >= process_memory_blocks[i].get_memory())
             {
                 if (best_index == -1)
@@ -98,7 +91,7 @@ void *best_fit(void* arg)
     {
         free_memory += free_memory_blocks[i].get_memory();
     }
-    cout << "Free Memory From Best Fit Is: " << free_memory << endl;
+    cout << "Free Memory From Best Fit Is: " << free_memory << endl << endl;
     mtx.unlock();
     return 0;
 }
@@ -107,36 +100,32 @@ void *best_fit(void* arg)
 void *first_fit(void *arg)
 {
     mtx.lock();
-    vector<Memory> free_memory_blocks;
-    free_memory_blocks = init_memory_blocks;
-    int free_memory;
+    vector<Memory> free_memory_blocks; //empty box
+    free_memory_blocks = init_memory_blocks; //assign the init memory to the vector of memory
+
+    int free_memory; //how much free memory in whole vector
+    int not_placed_index; // index 1 , where memory wasnt enough for process 
 
     // algorithm
-
-    // for (int i = 0; i < memory.get_block(); ++i)
-    // {
-    //     cout << "init memory " << i << " " << free_memory_blocks[i].get_memory() << endl;
-    //     cout << "process memory " << i << " " << process_memory_blocks[i].get_memory() << endl;
-    // }
-
-    for (int i = 0; i < memory.get_block(); ++i)
-    {
-        for (int j = 0; j < memory.get_block(); ++j)
-        {
+    for (int i = 0; i < memory.get_block(); ++i) // 150 ...gets process memory  
+    {    //i = 100
+        for (int j = 0; j < memory.get_block(); ++j) // 200 -> 50, 300, 400, etc.. // checks if process memory fits in the memory block
+        {   //j = 450
+            if (free_memory_blocks[j].get_memory() < process_memory_blocks[i].get_memory() && j == memory.get_block() - 1) cout << "Process "  << i + 1 << " cannot be allocated." << endl;
             if (free_memory_blocks[j].get_memory() >= process_memory_blocks[i].get_memory())
             {
-                int newVal = free_memory_blocks[j].get_memory() - process_memory_blocks[i].get_memory();
-                free_memory_blocks[j].set_memory(newVal);
+                int newVal = free_memory_blocks[j].get_memory() - process_memory_blocks[i].get_memory(); // 50 remaing memory after inserting the process
+                free_memory_blocks[j].set_memory(newVal); //sets the remaining memory for the specific memory block after insertion
                 break;
             }
         }
     }
-
+        //goes through every memory block and calculates remaining free mem
     for (int i = 0; i < memory.get_block(); ++i)
     {
         free_memory += free_memory_blocks[i].get_memory();
     }
-    cout << "Free Memory From First Fit Is: " << free_memory << endl;
+    cout << "Free Memory From First Fit Is: " << free_memory << endl << endl;
 
     mtx.unlock();
     return 0;
@@ -151,18 +140,12 @@ void *worst_fit(void* arg)
     int free_memory;
 
     // algorithm
-
-    // for (int i = 0; i < memory.get_block(); ++i)
-    // {
-    //     cout << "init memory " << i << " " << free_memory_blocks[i].get_memory() << endl;
-    //     cout << "process memory " << i << " " << process_memory_blocks[i].get_memory() << endl;
-    // }
-
     for (int i = 0; i < memory.get_block(); ++i)
     {
         int worst_index = -1;
         for (int j = 0; j < memory.get_block(); ++j)
         {
+            if (free_memory_blocks[j].get_memory() < process_memory_blocks[i].get_memory() && j == memory.get_block() - 1) cout << "Process "  << i + 1 << " cannot be allocated." << endl;
             if (free_memory_blocks[j].get_memory() >= process_memory_blocks[i].get_memory())
             {
                 if (worst_index == -1)
@@ -174,7 +157,6 @@ void *worst_fit(void* arg)
                 }
             }
         }
-
         int newVal = free_memory_blocks[worst_index].get_memory() - process_memory_blocks[i].get_memory();
         free_memory_blocks[worst_index].set_memory(newVal);
     }
@@ -184,7 +166,7 @@ void *worst_fit(void* arg)
         free_memory += free_memory_blocks[i].get_memory();
     }
 
-    cout << "Free Memory From Worst Fit Is: " << free_memory << endl;
+    cout << "Free Memory From Worst Fit Is: " << free_memory << endl << endl;
 
     mtx.unlock();
     return 0;
